@@ -11,7 +11,7 @@ A sleek and modern weather application built using Flutter. This app provides re
 🔄 Smooth animations and transitions
 🌓 Light and dark mode support
 
-##Technologies
+## Technologies
 Flutter for building a cross-platform app
 OpenWeather API (or any weather API you're using) for real-time data
 Dart for writing efficient and clean code
