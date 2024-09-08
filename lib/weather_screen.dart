@@ -15,7 +15,7 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
-  Future getCurrentWeather() async {
+  Future<Map<String, dynamic>> getCurrentWeather() async {
     try {
       String cityName = 'London';
       final res = await http.get(
@@ -30,8 +30,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
       }
 
       return data;
-
-      //  data['list'][0]['main']['temp'];
     } catch (e) {
       throw e.toString();
     }
@@ -59,12 +57,27 @@ class _WeatherScreenState extends State<WeatherScreen> {
         future: getCurrentWeather(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const Center(
+              child: CircularProgressIndicator.adaptive(),
+            );
           }
 
           if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
+            return Center(
+              child: Text(snapshot.error.toString()),
+            );
           }
+
+          final data = snapshot.data!;
+
+          final currentWeatherData = data['list'][0];
+
+          final currentTemp = currentWeatherData['main']['temp'];
+          final currentSky = currentWeatherData['weather'][0]['main'];
+          final currentPressure = currentWeatherData['main']['pressure'];
+          final currentWindSpeed = currentWeatherData['wind']['speed'];
+          final currentHumidity = currentWeatherData['main']['humidity'];
+
           return Padding(
             padding: const EdgeInsets.all(20),
             child:
@@ -84,26 +97,28 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         sigmaX: 10,
                         sigmaY: 10,
                       ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(32),
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
                         child: Column(
                           children: [
                             Text(
-                              '24°C',
-                              style: TextStyle(
+                              '$currentTemp K',
+                              style: const TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 24),
+                            const SizedBox(height: 24),
                             Icon(
-                              Icons.cloud,
+                              currentSky == 'Clouds' || currentSky == 'Rain'
+                                  ? Icons.cloud
+                                  : Icons.sunny,
                               size: 64,
                             ),
-                            SizedBox(height: 24),
+                            const SizedBox(height: 24),
                             Text(
-                              'Rain',
-                              style: TextStyle(
+                              currentSky,
+                              style: const TextStyle(
                                 fontSize: 24,
                               ),
                             ),
@@ -171,23 +186,23 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   AdditionalInfoItem(
                     icon: Icons.water_drop,
                     label: 'Humidity',
-                    value: '91',
+                    value: currentHumidity.toString(),
                   ),
                   AdditionalInfoItem(
                     icon: Icons.air,
                     label: 'Wind Speed',
-                    value: '7.5',
+                    value: currentWindSpeed.toString(),
                   ),
                   AdditionalInfoItem(
                     icon: Icons.beach_access,
                     label: 'Pressure',
-                    value: '1000',
+                    value: currentPressure.toString(),
                   ),
                 ],
               ),
